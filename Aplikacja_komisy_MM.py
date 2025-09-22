@@ -105,3 +105,22 @@ class Dealership:
         show_dealership_details()
 
         select_dealership(len(dealerships) - 1)
+
+    def show_dealerships() -> None:
+        listbox_lista_komisow.delete(0, END)
+        for idx, dealership in enumerate(dealerships):
+            listbox_lista_komisow.insert(idx, f'{idx + 1}. {dealership.name}')
+
+    def remove_dealership():
+        global current_dealership_index
+        if not listbox_lista_komisow.curselection():
+            messagebox.showerror("Błąd", "Wybierz komis do usunięcia")
+            return
+
+        i = listbox_lista_komisow.index(ACTIVE)
+        if i < len(dealerships) and dealerships[i].marker:
+            dealerships[i].marker.delete()
+        dealerships.pop(i)
+        show_dealerships()
+        current_dealership_index = None
+        clear_dealership_details()
