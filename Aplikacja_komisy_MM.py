@@ -206,3 +206,87 @@ def clear_dealership_details():
     label_szczegoly_website_wartosc.config(text="...")
     listbox_samochody.delete(0, END)
 
+
+def add_car_to_dealership():
+    global current_dealership_index
+    try:
+        if current_dealership_index is None:
+            messagebox.showerror("Błąd", "Wybierz komis z listy przed dodaniem samochodu")
+            return
+
+        i = listbox_lista_komisow.curselection()[0]
+        marka = entry_marka.get().strip()
+        model = entry_model.get().strip()
+        rok = entry_rok.get().strip()
+        cena = entry_cena.get().strip()
+        przebieg = entry_przebieg.get().strip()
+
+        if not all([marka, model, rok, cena, przebieg]):
+            messagebox.showerror("Błąd", "Wszystkie pola muszą być wypełnione")
+            return
+
+        rok_int = int(rok)
+        cena_float = float(cena)
+        przebieg_int = int(przebieg)
+
+        if rok_int < 1900 or rok_int > 2025:
+            messagebox.showerror("Błąd", "Podaj poprawny rok produkcji(1900-2025)")
+            return
+
+        if cena_float <= 0:
+            messagebox.showerror("Błąd", "Cena musi być większa od zera")
+            return
+
+        if przebieg_int < 0:
+            messagebox.showerror("Błąd", "Przebieg nie może być ujemny")
+            return
+
+        dealerships[current_dealership_index].add_car(
+            marka=marka,
+            model=model,
+            rok=rok,
+            cena=cena,
+            przebieg=przebieg,
+        )
+
+        entry_marka.delete(0, END)
+        entry_model.delete(0, END)
+        entry_rok.delete(0, END)
+        entry_cena.delete(0, END)
+        entry_przebieg.delete(0, END)
+
+        show_dealership_details()
+        messagebox.showinfo("Dodano samochód")
+
+    except ValueError as e:
+        messagebox.showerror("Błąd", "Rok, cena i przebieg muszą być poprawnymi liczbami")
+    except Exception as e:
+        messagebox.showerror("Błąd", f"Wystąpił nieoczekiwany błąd: {str(e)}")
+
+
+def remove_car_from_dealership():
+    global current_dealership_index
+
+    if current_dealership_index is None:
+        messagebox.showerror("Bład wybierz komis z listy")
+        return
+
+    if not listbox_samochody.curselection():
+        messagebox.showerror("Wybierz samochód do usunięcia")
+        return
+
+    i_samochodu = listbox_samochody.curselection()[0]
+    dealership = dealerships[current_dealership_index]
+    car_to_remove = dealership.cars[i_samochodu]
+
+    confirm = messagebox.askyesno(
+        "Potwierdzenie usunięcia",
+        f"Czy na pewno chcesz usunąć samochód:\n{car_to_remove['marka']} {car_to_remove['model']} {car_to_remove['rok']})?"
+    )
+    if confirm:
+        success = dealership.remove_car(i_samochodu)
+        if success:
+            show_dealership_details()
+            messagebox.showinfo("Samochód został usunięty")
+        else:
+            messagebox.showerror("Wystąpił błąd")
