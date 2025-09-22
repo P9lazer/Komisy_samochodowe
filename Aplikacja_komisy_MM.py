@@ -57,3 +57,51 @@ class Dealership:
             self.cars.pop(index)
             return True
         return False
+
+    def show_details(self):
+        for idx, dealer in enumerate(dealerships):
+            if dealer == self:
+                select_dealership(idx)
+                break
+
+    def select_dealership(index):
+        global current_dealership_index
+        current_dealership_index = index
+        listbox_lista_komisow.selection_clear(0, END)
+        listbox_lista_komisow.selection_set(index)
+        listbox_lista_komisow.activate(index)
+        show_dealership_details()
+
+    def add_dealership() -> None:
+        name = entry_nazwa.get().strip()
+        address = entry_adres.get().strip()
+        phone = entry_telefon.get().strip()
+        website = entry_website.get().strip()
+
+        if not name or not address:
+            messagebox.showerror("Błąd", "Nazwa i adres są wymagane!")
+            return
+
+        dealership = Dealership(
+            name=name,
+            address=address,
+            phone=phone,
+            website=website,
+            map_widget=map_widget
+        )
+        dealerships.append(dealership)
+
+        entry_nazwa.delete(0, END)
+        entry_adres.delete(0, END)
+        entry_telefon.delete(0, END)
+        entry_website.delete(0, END)
+
+        entry_nazwa.focus()
+        show_dealerships()
+
+        listbox_lista_komisow.selection_clear(0, END)
+        listbox_lista_komisow.selection_set(END)
+        listbox_lista_komisow.activate(END)
+        show_dealership_details()
+
+        select_dealership(len(dealerships) - 1)
