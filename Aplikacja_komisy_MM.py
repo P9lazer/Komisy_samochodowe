@@ -302,3 +302,32 @@ def on_car_select(event):
         button_usun_samochod.config(state=NORMAL)
     else:
         button_usun_samochod.config(state=DISABLED)
+
+root = Tk()
+root.geometry("1200x800")
+root.title("System zarządzania komisami samochodowymi")
+
+
+ramka_lista_komisow = Frame(root)
+ramka_formularz_komis = Frame(root)
+ramka_formularz_samochod = Frame(root)
+ramka_szczegoly = Frame(root)
+ramka_mapa = Frame(root)
+ramka_lista_samochodow = Frame(root)
+
+ramka_lista_komisow.grid(row=0, column=0, padx=10, pady=5, sticky="nsew")
+ramka_formularz_komis.grid(row=0, column=1, padx=10, pady=5, sticky="nsew")
+ramka_formularz_samochod.grid(row=0, column=2, padx=10, pady=5, sticky="nsew")
+ramka_szczegoly.grid(row=1, column=0, columnspan=3, padx=10, pady=5, sticky="ew")
+ramka_lista_samochodow.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="nsew")
+ramka_mapa.grid(row=2, column=2, padx=10, pady=5, sticky="nsew")
+
+root.grid_columnconfigure(0, weight=1)
+root.grid_columnconfigure(1, weight=1)
+root.grid_columnconfigure(2, weight=2)
+root.grid_rowconfigure(2, weight=1)
+
+
+
+label_lista_komisow = Label(ramka_lista_komisow, text="Lista komisów:")
+label_lista_komisow.grid(row=0, column=0)
