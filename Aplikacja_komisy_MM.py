@@ -331,3 +331,39 @@ root.grid_rowconfigure(2, weight=1)
 
 label_lista_komisow = Label(ramka_lista_komisow, text="Lista komisów:")
 label_lista_komisow.grid(row=0, column=0)
+
+listbox_lista_komisow = Listbox(ramka_lista_komisow, width=30, height=15)
+listbox_lista_komisow.grid(row=1, column=0, columnspan=3, sticky="nsew")
+listbox_lista_komisow.bind('<<ListboxSelect>>', on_dealership_select)
+
+button_pokaz_szczegoly = Button(ramka_lista_komisow, text="Pokaż szczegóły", command=show_dealership_details)
+button_pokaz_szczegoly.grid(row=2, column=0, pady=5)
+
+button_usun_komis = Button(ramka_lista_komisow, text="Usuń", command=remove_dealership)
+button_usun_komis.grid(row=2, column=1, pady=5)
+
+button_edytuj_komis = Button(ramka_lista_komisow, text="Edytuj", command=edit_dealership)
+button_edytuj_komis.grid(row=2, column=2, pady=5)
+
+label_formularz_komis = Label(ramka_formularz_komis, text="Dodaj komis:")
+label_formularz_komis.grid(row=0, column=0, columnspan=2)
+
+label_nazwa = Label(ramka_formularz_komis, text="Nazwa:")
+label_nazwa.grid(row=1, column=0, sticky=W)
+entry_nazwa = Entry(ramka_formularz_komis)
+entry_nazwa.grid(row=1, column=1,sticky='ew')
+
+label_adres = Label(ramka_formularz_komis, text="Adres:")
+label_adres.grid(row=2, column=0, sticky=W)
+entry_adres = Entry(ramka_formularz_komis)
+entry_adres.grid(row=2, column=1, sticky='ew')
+
+label_telefon = Label(ramka_formularz_komis, text="Telefon:")
+label_telefon.grid(row=3, column=0, sticky=W)
+entry_telefon = Entry(ramka_formularz_komis)
+entry_telefon.grid(row=3, column=1, sticky='ew')
+
+label_website = Label(ramka_formularz_komis, text="Website:")
+label_website.grid(row=4, column=0, sticky=W)
+entry_website = Entry(ramka_formularz_komis)
+entry_website.grid(row=4, column=1, sticky='ew')
