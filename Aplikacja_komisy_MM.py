@@ -64,117 +64,145 @@ class Dealership:
                 select_dealership(idx)
                 break
 
-    def select_dealership(index):
-        global current_dealership_index
-        current_dealership_index = index
-        listbox_lista_komisow.selection_clear(0, END)
-        listbox_lista_komisow.selection_set(index)
-        listbox_lista_komisow.activate(index)
-        show_dealership_details()
+def select_dealership(index):
+    global current_dealership_index
+    current_dealership_index = index
+    listbox_lista_komisow.selection_clear(0, END)
+    listbox_lista_komisow.selection_set(index)
+    listbox_lista_komisow.activate(index)
+    show_dealership_details()
 
-    def add_dealership() -> None:
-        name = entry_nazwa.get().strip()
-        address = entry_adres.get().strip()
-        phone = entry_telefon.get().strip()
-        website = entry_website.get().strip()
+def add_dealership() -> None:
+    name = entry_nazwa.get().strip()
+    address = entry_adres.get().strip()
+    phone = entry_telefon.get().strip()
+    website = entry_website.get().strip()
 
-        if not name or not address:
-            messagebox.showerror("Błąd", "Nazwa i adres są wymagane!")
-            return
+    if not name or not address:
+        messagebox.showerror("Błąd", "Nazwa i adres są wymagane!")
+    return
 
-        dealership = Dealership(
-            name=name,
-            address=address,
-            phone=phone,
-            website=website,
-            map_widget=map_widget
+    dealership = Dealership(
+        name=name,
+        address=address,
+        phone=phone,
+        website=website,
+        map_widget=map_widget
         )
-        dealerships.append(dealership)
+    dealerships.append(dealership)
 
-        entry_nazwa.delete(0, END)
-        entry_adres.delete(0, END)
-        entry_telefon.delete(0, END)
-        entry_website.delete(0, END)
+    entry_nazwa.delete(0, END)
+    entry_adres.delete(0, END)
+    entry_telefon.delete(0, END)
+    entry_website.delete(0, END)
 
-        entry_nazwa.focus()
-        show_dealerships()
+    entry_nazwa.focus()
+    show_dealerships()
 
-        listbox_lista_komisow.selection_clear(0, END)
-        listbox_lista_komisow.selection_set(END)
-        listbox_lista_komisow.activate(END)
-        show_dealership_details()
+    listbox_lista_komisow.selection_clear(0, END)
+    listbox_lista_komisow.selection_set(END)
+    listbox_lista_komisow.activate(END)
+    show_dealership_details()
 
-        select_dealership(len(dealerships) - 1)
+    select_dealership(len(dealerships) - 1)
 
-    def show_dealerships() -> None:
+def show_dealerships() -> None:
         listbox_lista_komisow.delete(0, END)
         for idx, dealership in enumerate(dealerships):
             listbox_lista_komisow.insert(idx, f'{idx + 1}. {dealership.name}')
 
-    def remove_dealership():
-        global current_dealership_index
-        if not listbox_lista_komisow.curselection():
-            messagebox.showerror("Błąd", "Wybierz komis do usunięcia")
-            return
+def remove_dealership():
+    global current_dealership_index
+    if not listbox_lista_komisow.curselection():
+        messagebox.showerror("Błąd", "Wybierz komis do usunięcia")
+        return
 
-        i = listbox_lista_komisow.index(ACTIVE)
-        if i < len(dealerships) and dealerships[i].marker:
-            dealerships[i].marker.delete()
-        dealerships.pop(i)
-        show_dealerships()
-        current_dealership_index = None
-        clear_dealership_details()
+    i = listbox_lista_komisow.index(ACTIE)
+    if i < len(dealerships) and dealerships[i].marker:
+        dealerships[i].marker.delete()
+    dealerships.pop(i)
+    show_dealerships()
+    current_dealership_index = None
+    clear_dealership_details()
 
-    def edit_dealership():
-        if not listbox_lista_komisow.curselection():
-            messagebox.showerror("Błąd", "Wybierz komis do edycji")
-            return
+def edit_dealership():
+    if not listbox_lista_komisow.curselection():
+        messagebox.showerror("Błąd", "Wybierz komis do edycji")
+        return
 
-        i = listbox_lista_komisow.index(ACTIVE)
-        dealership = dealerships[i]
+    i = listbox_lista_komisow.index(ACTIVE)
+    dealership = dealerships[i]
 
-        entry_nazwa.delete(0, END)
-        entry_adres.delete(0, END)
-        entry_telefon.delete(0, END)
-        entry_website.delete(0, END)
+    entry_nazwa.delete(0, END)
+    entry_adres.delete(0, END)
+    entry_telefon.delete(0, END)
+    entry_website.delete(0, END)
 
-        entry_nazwa.insert(0, dealership.name)
-        entry_adres.insert(0, dealership.address)
-        entry_telefon.insert(0, dealership.phone)
-        entry_website.insert(0, dealership.website)
+    entry_nazwa.insert(0, dealership.name)
+    entry_adres.insert(0, dealership.address)
+    entry_telefon.insert(0, dealership.phone)
+    entry_website.insert(0, dealership.website)
 
-        button_dodaj_komis.config(text='Zapisz zmiany', command=lambda: update_dealership(i))
+    button_dodaj_komis.config(text='Zapisz zmiany', command=lambda: update_dealership(i))
 
-    def update_dealership(i):
-        name = entry_nazwa.get().strip()
-        address = entry_adres.get().strip()
-        phone = entry_telefon.get().strip()
-        website = entry_website.get().strip()
+def update_dealership(i):
+    name = entry_nazwa.get().strip()
+    address = entry_adres.get().strip()
+    phone = entry_telefon.get().strip()
+    website = entry_website.get().strip()
 
-        if not name or not address:
-            messagebox.showerror("Błąd", "Nazwa i adres są wymagane!")
-            return
-        dealerships[i].name = name
-        dealerships[i].address = address
-        dealerships[i].phone = phone
-        dealerships[i].website = website
+    if not name or not address:
+        messagebox.showerror("Błąd", "Nazwa i adres są wymagane!")
+        return
+    dealerships[i].name = name
+    dealerships[i].address = address
+     dealerships[i].phone = phone
+    dealerships[i].website = website
 
-        old_coords = dealerships[i].coordinates
-        dealerships[i].coordinates = dealerships[i].get_coordinates()
+    old_coords = dealerships[i].coordinates
+    dealerships[i].coordinates = dealerships[i].get_coordinates()
 
-        dealerships[i].update_marker(map_widget)
-        show_dealerships()
-        button_dodaj_komis.config(text='Dodaj komis', command=add_dealership)
+    dealerships[i].update_marker(map_widget)
+    show_dealerships()
+    button_dodaj_komis.config(text='Dodaj komis', command=add_dealership)
 
-        entry_nazwa.delete(0, END)
-        entry_adres.delete(0, END)
-        entry_telefon.delete(0, END)
-        entry_website.delete(0, END)
-        entry_nazwa.focus()
-        select_dealership(i)
+    entry_nazwa.delete(0, END)
+    entry_adres.delete(0, END)
+    entry_telefon.delete(0, END)
+    entry_website.delete(0, END)
+    entry_nazwa.focus()
+    select_dealership(i)
 
-        listbox_lista_komisow.selection_clear(0, END)
-        listbox_lista_komisow.selection_set(i)
-        listbox_lista_komisow.activate(i)
-        show_dealership_details()
+    listbox_lista_komisow.selection_clear(0, END)
+    listbox_lista_komisow.selection_set(i)
+    listbox_lista_komisow.activate(i)
+    show_dealership_details()
+
+def show_dealership_details() -> None:
+    global current_dealership_index
+
+    if current_dealership_index is None or current_dealership_index >= len(dealerships):
+        return
+
+    dealership = dealerships[current_dealership_index]
+
+    label_szczegoly_nazwa_wartosc.config(text=dealership.name)
+    label_szczegoly_adres_wartosc.config(text=dealership.address)
+    label_szczegoly_telefon_wartosc.config(text=dealership.phone)
+    label_szczegoly_website_wartosc.config(text=dealership.website)
+
+    listbox_samochody.delete(0, END)
+    for car in dealership.cars:
+        listbox_samochody.insert(END,f"{car['marka']} {car['model']} ({car['rok']}) - {car['cena']} PLN, {car['przebieg']} km")
+
+    if dealership.coordinates:
+        map_widget.set_zoom(15)
+        map_widget.set_position(dealership.coordinates[0], dealership.coordinates[1])
+
+def clear_dealership_details():
+    label_szczegoly_nazwa_wartosc.config(text="...")
+    label_szczegoly_adres_wartosc.config(text="...")
+    label_szczegoly_telefon_wartosc.config(text="...")
+    label_szczegoly_website_wartosc.config(text="...")
+    listbox_samochody.delete(0, END)
 
