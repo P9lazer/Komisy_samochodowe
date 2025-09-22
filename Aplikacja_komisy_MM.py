@@ -124,3 +124,57 @@ class Dealership:
         show_dealerships()
         current_dealership_index = None
         clear_dealership_details()
+
+    def edit_dealership():
+        if not listbox_lista_komisow.curselection():
+            messagebox.showerror("Błąd", "Wybierz komis do edycji")
+            return
+
+        i = listbox_lista_komisow.index(ACTIVE)
+        dealership = dealerships[i]
+
+        entry_nazwa.delete(0, END)
+        entry_adres.delete(0, END)
+        entry_telefon.delete(0, END)
+        entry_website.delete(0, END)
+
+        entry_nazwa.insert(0, dealership.name)
+        entry_adres.insert(0, dealership.address)
+        entry_telefon.insert(0, dealership.phone)
+        entry_website.insert(0, dealership.website)
+
+        button_dodaj_komis.config(text='Zapisz zmiany', command=lambda: update_dealership(i))
+
+    def update_dealership(i):
+        name = entry_nazwa.get().strip()
+        address = entry_adres.get().strip()
+        phone = entry_telefon.get().strip()
+        website = entry_website.get().strip()
+
+        if not name or not address:
+            messagebox.showerror("Błąd", "Nazwa i adres są wymagane!")
+            return
+        dealerships[i].name = name
+        dealerships[i].address = address
+        dealerships[i].phone = phone
+        dealerships[i].website = website
+
+        old_coords = dealerships[i].coordinates
+        dealerships[i].coordinates = dealerships[i].get_coordinates()
+
+        dealerships[i].update_marker(map_widget)
+        show_dealerships()
+        button_dodaj_komis.config(text='Dodaj komis', command=add_dealership)
+
+        entry_nazwa.delete(0, END)
+        entry_adres.delete(0, END)
+        entry_telefon.delete(0, END)
+        entry_website.delete(0, END)
+        entry_nazwa.focus()
+        select_dealership(i)
+
+        listbox_lista_komisow.selection_clear(0, END)
+        listbox_lista_komisow.selection_set(i)
+        listbox_lista_komisow.activate(i)
+        show_dealership_details()
+
