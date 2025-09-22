@@ -290,3 +290,15 @@ def remove_car_from_dealership():
             messagebox.showinfo("Samochód został usunięty")
         else:
             messagebox.showerror("Wystąpił błąd")
+
+def on_dealership_select(event):
+    if listbox_lista_komisow.curselection():
+        index = listbox_lista_komisow.curselection()[0]
+        select_dealership(index)
+
+
+def on_car_select(event):
+    if listbox_samochody.curselection():
+        button_usun_samochod.config(state=NORMAL)
+    else:
+        button_usun_samochod.config(state=DISABLED)
