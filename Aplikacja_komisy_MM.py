@@ -66,11 +66,15 @@ class Dealership:
 
 def select_dealership(index):
     global current_dealership_index
-    current_dealership_index = index
-    listbox_lista_komisow.selection_clear(0, END)
-    listbox_lista_komisow.selection_set(index)
-    listbox_lista_komisow.activate(index)
-    show_dealership_details()
+    if 0 <= index < len(dealerships):
+        current_dealership_index = index
+        listbox_lista_komisow.selection_clear(0, END)
+        listbox_lista_komisow.selection_set(index)
+        listbox_lista_komisow.activate(index)
+        show_dealership_details()
+    else:
+        current_dealership_index = None
+        clear_dealership_details()
 
 def add_dealership() -> None:
     name = entry_nazwa.get().strip()
@@ -80,7 +84,7 @@ def add_dealership() -> None:
 
     if not name or not address:
         messagebox.showerror("Błąd", "Nazwa i adres są wymagane!")
-    return
+        return
 
     dealership = Dealership(
         name=name,
@@ -88,7 +92,7 @@ def add_dealership() -> None:
         phone=phone,
         website=website,
         map_widget=map_widget
-        )
+    )
     dealerships.append(dealership)
 
     entry_nazwa.delete(0, END)
@@ -107,30 +111,34 @@ def add_dealership() -> None:
     select_dealership(len(dealerships) - 1)
 
 def show_dealerships() -> None:
-        listbox_lista_komisow.delete(0, END)
-        for idx, dealership in enumerate(dealerships):
-            listbox_lista_komisow.insert(idx, f'{idx + 1}. {dealership.name}')
+    listbox_lista_komisow.delete(0, END)
+    for idx, dealership in enumerate(dealerships):
+        listbox_lista_komisow.insert(idx, f'{idx + 1}. {dealership.name}')
 
 def remove_dealership():
     global current_dealership_index
-    if not listbox_lista_komisow.curselection():
+    if current_dealership_index is None or not listbox_lista_komisow.curselection():
         messagebox.showerror("Błąd", "Wybierz komis do usunięcia")
         return
 
-    i = listbox_lista_komisow.index(ACTIE)
+    i = current_dealership_index
     if i < len(dealerships) and dealerships[i].marker:
         dealerships[i].marker.delete()
     dealerships.pop(i)
     show_dealerships()
-    current_dealership_index = None
-    clear_dealership_details()
+    if dealerships:
+        new_index = min(i, len(dealerships) - 1)
+        select_dealership(new_index)
+    else:
+        current_dealership_index = None
+        clear_dealership_details()
 
 def edit_dealership():
-    if not listbox_lista_komisow.curselection():
+    if current_dealership_index is None:
         messagebox.showerror("Błąd", "Wybierz komis do edycji")
         return
 
-    i = listbox_lista_komisow.index(ACTIVE)
+    i = current_dealership_index
     dealership = dealerships[i]
 
     entry_nazwa.delete(0, END)
@@ -156,13 +164,21 @@ def update_dealership(i):
         return
     dealerships[i].name = name
     dealerships[i].address = address
-     dealerships[i].phone = phone
+    dealerships[i].phone = phone
     dealerships[i].website = website
 
     old_coords = dealerships[i].coordinates
     dealerships[i].coordinates = dealerships[i].get_coordinates()
 
-    dealerships[i].update_marker(map_widget)
+    if dealerships[i].marker:
+        dealerships[i].marker.delete()
+        if map_widget and dealerships[i].coordinates:
+            dealerships[i].marker = map_widget.set_marker(
+                dealerships[i].coordinates[0],
+                dealerships[i].coordinates[1],
+                text=f'{dealerships[i].name}',
+                command=dealerships[i].show_details
+            )
     show_dealerships()
     button_dodaj_komis.config(text='Dodaj komis', command=add_dealership)
 
@@ -182,6 +198,7 @@ def show_dealership_details() -> None:
     global current_dealership_index
 
     if current_dealership_index is None or current_dealership_index >= len(dealerships):
+        clear_dealership_details()
         return
 
     dealership = dealerships[current_dealership_index]
@@ -205,6 +222,7 @@ def clear_dealership_details():
     label_szczegoly_telefon_wartosc.config(text="...")
     label_szczegoly_website_wartosc.config(text="...")
     listbox_samochody.delete(0, END)
+    button_usun_samochod.config(state=DISABLED)
 
 
 def add_car_to_dealership():
@@ -244,9 +262,9 @@ def add_car_to_dealership():
         dealerships[current_dealership_index].add_car(
             marka=marka,
             model=model,
-            rok=rok,
-            cena=cena,
-            przebieg=przebieg,
+            rok=rok_int,
+            cena=cena_float,
+            przebieg=przebieg_int
         )
 
         entry_marka.delete(0, END)
@@ -261,7 +279,7 @@ def add_car_to_dealership():
     except ValueError as e:
         messagebox.showerror("Błąd", "Rok, cena i przebieg muszą być poprawnymi liczbami")
     except Exception as e:
-        messagebox.showerror("Błąd", f"Wystąpił nieoczekiwany błąd: {str(e)}")
+        messagebox.showerror("Błąd", f"Wybierz komis z listy: {str(e)}")
 
 
 def remove_car_from_dealership():
@@ -275,34 +293,65 @@ def remove_car_from_dealership():
         messagebox.showerror("Wybierz samochód do usunięcia")
         return
 
-    i_samochodu = listbox_samochody.curselection()[0]
-    dealership = dealerships[current_dealership_index]
-    car_to_remove = dealership.cars[i_samochodu]
+    try:
+        i_samochodu = listbox_samochody.curselection()[0]
 
-    confirm = messagebox.askyesno(
-        "Potwierdzenie usunięcia",
-        f"Czy na pewno chcesz usunąć samochód:\n{car_to_remove['marka']} {car_to_remove['model']} {car_to_remove['rok']})?"
-    )
-    if confirm:
-        success = dealership.remove_car(i_samochodu)
-        if success:
-            show_dealership_details()
-            messagebox.showinfo("Samochód został usunięty")
-        else:
-            messagebox.showerror("Wystąpił błąd")
+        dealership = dealerships[current_dealership_index]
+
+        # Sprawdź czy indeks samochodu jest poprawny
+        if i_samochodu < 0 or i_samochodu >= len(dealership.cars):
+            messagebox.showerror("Błąd", "Wybrany samochód nie istnieje")
+            return
+
+        car_to_remove = dealership.cars[i_samochodu]
+
+        # Potwierdzenie usunięcia
+        confirm = messagebox.askyesno(
+            "Potwierdzenie usunięcia",
+            f"Czy na pewno chcesz usunąć samochód:\n{car_to_remove['marka']} {car_to_remove['model']} ({car_to_remove['rok']})?"
+        )
+
+        if confirm:
+            success = dealership.remove_car(i_samochodu)
+            if success:
+                # Wyczyść zaznaczenie po usunięciu
+                listbox_samochody.selection_clear(0, END)
+                button_usun_samochod.config(state=DISABLED)
+
+                show_dealership_details()
+                messagebox.showinfo("Sukces", "Samochód został usunięty pomyślnie")
+            else:
+                messagebox.showerror("Błąd", "Nie udało się usunąć samochodu")
+
+    except IndexError:
+        messagebox.showerror("Błąd", "Wybrany samochód nie istnieje")
+    except Exception as e:
+        messagebox.showerror("Błąd", f"Wystąpił nieoczekiwany błąd: {str(e)}")
 
 def on_dealership_select(event):
     if listbox_lista_komisow.curselection():
-        index = listbox_lista_komisow.curselection()[0]
-        select_dealership(index)
+        try:
+            index = listbox_lista_komisow.curselection()[0]
+            select_dealership(index)
+        except IndexError:
+            current_dealership_index = None
+            clear_dealership_details()
 
 
 def on_car_select(event):
-    if listbox_samochody.curselection():
-        button_usun_samochod.config(state=NORMAL)
-    else:
+    try:
+        if listbox_samochody.curselection() and current_dealership_index is not None:
+            i_samochodu = listbox_samochody.curselection()[0]
+            dealership = dealerships[current_dealership_index]
+            # Sprawdź czy indeks jest poprawny
+            if 0 <= i_samochodu < len(dealership.cars):
+                button_usun_samochod.config(state=NORMAL)
+            else:
+                button_usun_samochod.config(state=DISABLED)
+        else:
+            button_usun_samochod.config(state=DISABLED)
+    except (IndexError, TypeError):
         button_usun_samochod.config(state=DISABLED)
-
 root = Tk()
 root.geometry("1200x800")
 root.title("System zarządzania komisami samochodowymi")
@@ -363,7 +412,98 @@ label_telefon.grid(row=3, column=0, sticky=W)
 entry_telefon = Entry(ramka_formularz_komis)
 entry_telefon.grid(row=3, column=1, sticky='ew')
 
-label_website = Label(ramka_formularz_komis, text="Website:")
+label_website = Label(ramka_formularz_komis, text="Strona:")
 label_website.grid(row=4, column=0, sticky=W)
 entry_website = Entry(ramka_formularz_komis)
 entry_website.grid(row=4, column=1, sticky='ew')
+
+button_dodaj_komis = Button(ramka_formularz_komis, text="Dodaj komis", command=add_dealership)
+button_dodaj_komis.grid(row=5, column=0, columnspan=2, pady=5)
+
+label_formularz_samochod = Label(ramka_formularz_samochod, text="Dodaj samochód:")
+label_formularz_samochod.grid(row=0, column=0, columnspan=2)
+
+label_marka = Label(ramka_formularz_samochod, text="Marka:")
+label_marka.grid(row=1, column=0, sticky=W)
+entry_marka = Entry(ramka_formularz_samochod)
+entry_marka.grid(row=1, column=1, sticky="ew")
+
+label_model = Label(ramka_formularz_samochod, text="Model:")
+label_model.grid(row=2, column=0, sticky=W)
+entry_model = Entry(ramka_formularz_samochod)
+entry_model.grid(row=2, column=1, sticky='ew')
+
+label_rok = Label(ramka_formularz_samochod, text="Rok produkcji:")
+label_rok.grid(row=3, column=0, sticky=W)
+entry_rok = Entry(ramka_formularz_samochod)
+entry_rok.grid(row=3, column=1, sticky='ew')
+
+label_cena = Label(ramka_formularz_samochod, text="Cena (PLN):")
+label_cena.grid(row=4, column=0, sticky=W)
+entry_cena = Entry(ramka_formularz_samochod)
+entry_cena.grid(row=4, column=1, sticky='ew')
+
+label_przebieg = Label(ramka_formularz_samochod, text="Przebieg (km):")
+label_przebieg.grid(row=5, column=0, sticky=W)
+entry_przebieg = Entry(ramka_formularz_samochod)
+entry_przebieg.grid(row=5, column=1, sticky='ew')
+
+button_dodaj_samochod = Button(ramka_formularz_samochod, text="Dodaj samochód", command=add_car_to_dealership)
+button_dodaj_samochod.grid(row=6, column=0, columnspan=2, pady=5)
+
+
+label_szczegoly = Label(ramka_szczegoly, text="Szczegóły komisu:")
+label_szczegoly.grid(row=0, column=0, sticky=W)
+
+label_szczegoly_nazwa = Label(ramka_szczegoly, text="Nazwa:")
+label_szczegoly_nazwa.grid(row=1, column=0)
+label_szczegoly_nazwa_wartosc = Label(ramka_szczegoly, text="...")
+label_szczegoly_nazwa_wartosc.grid(row=1, column=1)
+
+label_szczegoly_adres = Label(ramka_szczegoly, text="Adres:")
+label_szczegoly_adres.grid(row=1, column=2)
+label_szczegoly_adres_wartosc = Label(ramka_szczegoly, text="...")
+label_szczegoly_adres_wartosc.grid(row=1, column=3)
+
+label_szczegoly_telefon = Label(ramka_szczegoly, text="Telefon:")
+label_szczegoly_telefon.grid(row=1, column=4)
+label_szczegoly_telefon_wartosc = Label(ramka_szczegoly, text="...")
+label_szczegoly_telefon_wartosc.grid(row=1, column=5)
+
+label_szczegoly_website = Label(ramka_szczegoly, text="Strona:")
+label_szczegoly_website.grid(row=1, column=6)
+label_szczegoly_website_wartosc = Label(ramka_szczegoly, text="...")
+label_szczegoly_website_wartosc.grid(row=1, column=7)
+
+ramka_lista_samochodow_controls = Frame(ramka_lista_samochodow)
+ramka_lista_samochodow_controls.grid(row=0, column=0, sticky="ew")
+
+label_lista_samochodow = Label(ramka_lista_samochodow_controls, text="Lista samochodów:")
+label_lista_samochodow.grid(row=0, column=0, sticky=W)
+
+button_usun_samochod = Button(ramka_lista_samochodow_controls, text="Usuń samochód", command=remove_car_from_dealership, state=DISABLED)
+button_usun_samochod.grid(row=0, column=1, padx=10)
+
+listbox_samochody = Listbox(ramka_lista_samochodow, width=80, height=10)
+listbox_samochody.grid(row=1, column=0,sticky="nsew")
+listbox_samochody.bind('<<ListboxSelect>>', on_car_select)
+
+map_widget = tkintermapview.TkinterMapView(ramka_mapa, width=500, height=500, corner_radius=0)
+map_widget.grid(row=0, column=0, sticky="nsew")
+map_widget.set_position(52.2297, 21.0122)  # Warszawa
+map_widget.set_zoom(6)
+
+ramka_lista_komisow.grid_rowconfigure(1, weight=1)
+ramka_lista_komisow.grid_columnconfigure(0, weight=1)
+
+ramka_formularz_komis.grid_columnconfigure(1, weight=1)
+ramka_formularz_samochod.grid_columnconfigure(1, weight=1)
+
+ramka_lista_samochodow.grid_rowconfigure(1, weight=1)
+ramka_lista_samochodow.grid_columnconfigure(0, weight=1)
+
+ramka_mapa.grid_rowconfigure(0, weight=1)
+ramka_mapa.grid_columnconfigure(0, weight=1)
+
+
+root.mainloop()
